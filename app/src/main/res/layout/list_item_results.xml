@@ -9,11 +9,12 @@
     <ImageView
         android:id="@+id/list_item_results_imageview"
         android:layout_width="80dp"
-        android:layout_height="80dp" />
+        android:layout_height="80dp"
+        android:scaleType="fitCenter" />
 
     <TextView
         android:id="@+id/list_item_results_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical" />
+        android:layout_gravity="center_vertical" />
 </LinearLayout>
