@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -66,7 +67,7 @@ public class MainActivityFragment extends Fragment {
 
 /*
         mSearchAdapter = new ArrayAdapter<>(getActivity(),
-                R.layout.list_item_results,
+                R.layout.list_item_results_artists,
                 R.id.list_item_results_textview,
                 new ArrayList<String>());
 */
@@ -77,6 +78,16 @@ public class MainActivityFragment extends Fragment {
         // Get the list view from the xml and set adapter to it.
         listView.setAdapter(mSearchAdapter);
 
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Artist artist = mSearchAdapter.mArtistsList.get(position);
+                String artistId = artist.id;
+                String artistName = artist.name;
+                makeToast("Searching songs for " + artistName + ".");
+
+            }
+        });
         return rootView;
     }
 
@@ -126,8 +137,8 @@ public class MainActivityFragment extends Fragment {
     }
 
     public class ArtistsListAdapter extends BaseAdapter {
-        private LayoutInflater mInflater;
-        private List<Artist> mArtistsList;
+        private final LayoutInflater mInflater;
+        private final List<Artist> mArtistsList;
 
         public ArtistsListAdapter(Context context, List<Artist> artists) {
             mInflater = LayoutInflater.from(context);
@@ -154,10 +165,12 @@ public class MainActivityFragment extends Fragment {
             View view;
             ViewHolder holder;
             if (convertView == null) {
-                view = mInflater.inflate(R.layout.list_item_results, parent, false);
+                view = mInflater.inflate(R.layout.list_item_results_artists, parent, false);
                 holder = new ViewHolder();
-                holder.thumbnail = (ImageView) view.findViewById(R.id.list_item_results_imageview);
-                holder.name = (TextView) view.findViewById(R.id.list_item_results_textview);
+                holder.thumbnail =
+                        (ImageView) view.findViewById(R.id.list_item_results_artists_imageview);
+                holder.name =
+                        (TextView) view.findViewById(R.id.list_item_results_artists_textview);
                 view.setTag(holder);
             } else {
                 view = convertView;
