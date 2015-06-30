@@ -158,14 +158,15 @@ public class MainActivityFragment extends Fragment {
             }
 
             Artist artist = mArtistsList.get(position);
-            Image artistImage = artist.images.get(0);
-            holder.name.setText(artist.name);
-            Picasso.with(getActivity())
-                    .load(artistImage.url)
-                    .resize(80, 80)
-                    .centerCrop()
-                    .into(holder.thumbnail);
-
+            if (artist != null && artist.images != null && artist.images.size() > 0) {
+                Image artistImage = artist.images.get(0);
+                holder.name.setText(artist.name);
+                Picasso.with(getActivity())
+                        .load(artistImage.url)
+                        .resize(80, 80)
+                        .centerCrop()
+                        .into(holder.thumbnail);
+            }
             return view;
         }
 
