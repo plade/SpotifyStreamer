@@ -82,7 +82,7 @@ public class MainActivityFragment extends Fragment {
 
     private void searchArtists(String key) {
         new SpotifyAsyncTask().execute(key);
-        makeToast(key);
+        //  makeToast(key);
     }
 
     private void makeToast(String key) {
@@ -111,6 +111,13 @@ public class MainActivityFragment extends Fragment {
 
         @Override
         protected void onPostExecute(ArtistsPager artistsPager) {
+            if (artistsPager == null
+                    || artistsPager.artists == null
+                    || artistsPager.artists.items == null
+                    || artistsPager.artists.items.size() == 0) {
+                makeToast("Artist " + searchKey + " was not found. try again.");
+                return;
+            }
             List<Artist> artistsList = artistsPager.artists.items;
             // ArrayList<String> artistNames = new ArrayList<String>();
             mSearchAdapter = new ArtistsListAdapter(getActivity(), artistsList);
