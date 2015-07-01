@@ -1,6 +1,7 @@
 package edu.buffalo.pratikla.spotifystreamer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -85,6 +86,10 @@ public class MainActivityFragment extends Fragment {
                 String artistId = artist.id;
                 String artistName = artist.name;
                 makeToast("Searching songs for " + artistName + ".");
+                Intent intent = new Intent(getActivity(), TrackList.class);
+                intent.putExtra("artistId", artistId);
+                intent.putExtra("artistName", artistName);
+                startActivity(intent);
 
             }
         });
