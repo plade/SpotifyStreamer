@@ -1,5 +1,7 @@
 package edu.buffalo.pratikla.spotifystreamer;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -30,7 +32,16 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_help) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Help")
+                    .setMessage(getResources().getString(R.string.help_dialog_box_text))
+                    .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    }).show();
+
             return true;
         }
 
