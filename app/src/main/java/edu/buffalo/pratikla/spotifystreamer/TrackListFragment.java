@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,6 +37,7 @@ public class TrackListFragment extends Fragment {
 
     private final String TAG = "TrackListFragment";
     private String artistName;
+    private List<Track> mTrackList;
 
     private ListView listView;
     private TrackListAdapter mTrackAdapter;
@@ -53,7 +55,7 @@ public class TrackListFragment extends Fragment {
         artistName = receivedIntent.getStringExtra("artistName");
 
         if (artistName != null) {
-            getActivity().setTitle("Top 10 Tracks " + artistName);
+            getActivity().setTitle("Top 10 Tracks: " + artistName);
 
             Log.d(TAG, "Artist Name: " + artistName);
         }
@@ -116,12 +118,12 @@ public class TrackListFragment extends Fragment {
                 makeToast("No tracks found for " + artistName + ". Try again.");
                 return;
             }
-            List<Track> trackList = tracks.tracks;
-            if (trackList.size() > 10) {
-                trackList = trackList.subList(0, 10);
+            mTrackList = tracks.tracks;
+            if (mTrackList.size() > 10) {
+                mTrackList = mTrackList.subList(0, 10);
             }
 
-            mTrackAdapter = new TrackListAdapter(getActivity(), trackList);
+            mTrackAdapter = new TrackListAdapter(getActivity(), mTrackList);
             listView.setAdapter(mTrackAdapter);
         }
     }
