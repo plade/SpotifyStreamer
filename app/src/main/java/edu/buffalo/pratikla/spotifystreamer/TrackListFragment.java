@@ -24,11 +24,10 @@ import java.util.Map;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
-import retrofit.http.QueryMap;
+import retrofit.RetrofitError;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -37,7 +36,6 @@ public class TrackListFragment extends Fragment {
 
     private final String TAG = "TrackListFragment";
     private String artistName;
-    private String artistId;
 
     private ListView listView;
     private TrackListAdapter mTrackAdapter;
@@ -47,6 +45,7 @@ public class TrackListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        String artistId;
         View rootView = inflater.inflate(R.layout.fragment_track_list, container, false);
 
         Intent receivedIntent = getActivity().getIntent();
@@ -59,7 +58,7 @@ public class TrackListFragment extends Fragment {
             Log.d(TAG, "Artist Name: " + artistName);
         }
         if (artistId != null) {
-            Log.d(TAG, "Artist Id:" +artistId);
+            Log.d(TAG, "Artist Id:" + artistId);
             populateTrackList(artistId);
         }
 
@@ -76,9 +75,15 @@ public class TrackListFragment extends Fragment {
         new SpotifyAsyncTask().execute(artistId);
     }
 
+    private void makeToast(String key) {
+        Toast toast = Toast.makeText(getActivity(), key, Toast.LENGTH_SHORT);
+        toast.show();
+    }
+
     private class SpotifyAsyncTask extends AsyncTask<String, Void, Tracks> {
-        private final String TAG = "SpotifyAsyncTask";
+        // private final String TAG = "SpotifyAsyncTask";
         private String artistId;
+
         @Override
         protected Tracks doInBackground(String... params) {
             Tracks tracks = null;
@@ -88,9 +93,17 @@ public class TrackListFragment extends Fragment {
 
             if (artistId != null) {
                 SpotifyApi spotifyApi = new SpotifyApi();
-                Map <String, Object> queryMap = new HashMap<>();
+                Map<String, Object> queryMap = new HashMap<>();
                 queryMap.put(SpotifyService.COUNTRY, "US");
-                tracks = spotifyApi.getService().getArtistTopTrack(artistId, queryMap);
+                try {
+                    tracks = spotifyApi.getService().getArtistTopTrack(artistId, queryMap);
+                } catch (RetrofitError e) {
+                    Log.d(TAG, "Exception in HTTP Request: " + e.getMessage());
+                    return null;
+                } catch (Exception e) {
+                    Log.e(TAG, "Unexpected error: ");
+                    e.printStackTrace();
+                }
             }
             return tracks;
         }
@@ -103,18 +116,15 @@ public class TrackListFragment extends Fragment {
                 makeToast("No tracks found for " + artistName + ". Try again.");
                 return;
             }
-            List<Track> trackList = tracks.tracks.subList(0,10);
+            List<Track> trackList = tracks.tracks;
+            if (trackList.size() > 10) {
+                trackList = trackList.subList(0, 10);
+            }
 
             mTrackAdapter = new TrackListAdapter(getActivity(), trackList);
             listView.setAdapter(mTrackAdapter);
         }
     }
-
-    private void makeToast(String key) {
-        Toast toast = Toast.makeText(getActivity(), key, Toast.LENGTH_SHORT);
-        toast.show();
-    }
-
 
     private class TrackListAdapter extends BaseAdapter {
         private final LayoutInflater mInflater;

@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,13 +30,14 @@ import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 import kaaes.spotify.webapi.android.models.Image;
+import retrofit.RetrofitError;
 
 
 /**
  * A placeholder fragment containing a simple view.
  */
 public class MainActivityFragment extends Fragment {
-    private static final String TAG = "MainFragment";
+    // private static final String TAG = "MainFragment";
     // private ArrayAdapter mSearchAdapter;
     private ArtistsListAdapter mSearchAdapter;
     private ListView listView;
@@ -65,13 +67,6 @@ public class MainActivityFragment extends Fragment {
                 return handled;
             }
         });
-
-/*
-        mSearchAdapter = new ArrayAdapter<>(getActivity(),
-                R.layout.list_item_results_artists,
-                R.id.list_item_results_textview,
-                new ArrayList<String>());
-*/
 
         mSearchAdapter = new ArtistsListAdapter(getActivity(), new ArrayList<Artist>());
 
@@ -120,7 +115,15 @@ public class MainActivityFragment extends Fragment {
             if (searchKey != null) {
                 SpotifyApi api = new SpotifyApi();
 
-                artists = api.getService().searchArtists(searchKey);
+                try {
+                    artists = api.getService().searchArtists(searchKey);
+                } catch (RetrofitError e) {
+                    Log.d(TAG, "Exception in HTTP Request: " + e.getMessage());
+                    return null;
+                } catch (Exception e) {
+                    Log.e(TAG, "Unexpected error: ");
+                    e.printStackTrace();
+                }
             }
             return artists;
         }
