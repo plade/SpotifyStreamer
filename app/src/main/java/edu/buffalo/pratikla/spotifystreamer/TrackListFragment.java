@@ -1,10 +1,14 @@
 package edu.buffalo.pratikla.spotifystreamer;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -55,7 +59,14 @@ public class TrackListFragment extends Fragment {
         artistName = receivedIntent.getStringExtra("artistName");
 
         if (artistName != null) {
-            getActivity().setTitle("Top 10 Tracks: " + artistName);
+
+            ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
+            ab.setTitle("Top 10 Tracks");
+            ab.setSubtitle(artistName);
+
+//            getActivity().setTitle("Top 10 Tracks: " + artistName);
+            Log.d(TAG, getActivity().getLocalClassName());
+
 
             Log.d(TAG, "Artist Name: " + artistName);
         }

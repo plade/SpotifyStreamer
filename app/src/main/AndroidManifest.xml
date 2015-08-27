@@ -28,6 +28,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="edu.buffalo.pratikla.spotifystreamer.MainActivity" />
         </activity>
+        <activity
+            android:name=".PlayerActivity"
+            android:label="@string/title_activity_player"
+            android:parentActivityName=".TrackList" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="edu.buffalo.pratikla.spotifystreamer.TrackList" />
+        </activity>
     </application>
 
 </manifest>

@@ -9,4 +9,5 @@
         You can click an artist name from the search results to see their top 10 tracks in the US.
     </string>
     <string name="action_help">Help</string>
+    <string name="title_activity_player">PlayerActivity</string>
 </resources>
