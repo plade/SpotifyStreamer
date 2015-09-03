@@ -84,11 +84,14 @@ public class TrackListFragment extends Fragment {
                 Track track = mTrackAdapter.mTrackList.get(position);
                 String trackId = track.id;
                 String trackName = track.name;
+                String albumName = track.album.name;
                 makeToast("Playing " + trackName + ".");
                 Intent intent = new Intent(getActivity(), PlayerActivity.class);
                 intent.putExtra("artistId", artistId);
+                intent.putExtra("artistName", artistName);
                 intent.putExtra("trackName", trackName);
                 intent.putExtra("trackId", trackId);
+                intent.putExtra("albumName", albumName);
                 startActivity(intent);
             }
         });
