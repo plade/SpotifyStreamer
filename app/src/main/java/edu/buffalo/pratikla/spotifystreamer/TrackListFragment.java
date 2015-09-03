@@ -1,19 +1,17 @@
 package edu.buffalo.pratikla.spotifystreamer;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -41,6 +39,7 @@ public class TrackListFragment extends Fragment {
 
     private final String TAG = "TrackListFragment";
     private String artistName;
+    private String artistId;
     private List<Track> mTrackList;
 
     private ListView listView;
@@ -51,7 +50,6 @@ public class TrackListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        String artistId;
         View rootView = inflater.inflate(R.layout.fragment_track_list, container, false);
 
         Intent receivedIntent = getActivity().getIntent();
@@ -79,6 +77,21 @@ public class TrackListFragment extends Fragment {
 
         mTrackAdapter = new TrackListAdapter(getActivity(), new ArrayList<Track>());
         listView.setAdapter(mTrackAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Track track = mTrackAdapter.mTrackList.get(position);
+                String trackId = track.id;
+                String trackName = track.name;
+                makeToast("Playing " + trackName + ".");
+                Intent intent = new Intent(getActivity(), PlayerActivity.class);
+                intent.putExtra("artistId", artistId);
+                intent.putExtra("trackName", trackName);
+                intent.putExtra("trackId", trackId);
+                startActivity(intent);
+            }
+        });
 
 
         return rootView;

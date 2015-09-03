@@ -1,5 +1,6 @@
 package edu.buffalo.pratikla.spotifystreamer;
 
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,6 +18,16 @@ public class PlayerActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_player, container, false);
+        View rootview = inflater.inflate(R.layout.fragment_player, container, false);
+
+        Intent receivedIntent = getActivity().getIntent();
+        String artistId = receivedIntent.getStringExtra("artistId");
+        String trackId = receivedIntent.getStringExtra("trackId");
+        String trackName = receivedIntent.getStringExtra("trackName");
+        getActivity().setTitle("Spotify Streamer");
+
+
+
+        return rootview;
     }
 }
