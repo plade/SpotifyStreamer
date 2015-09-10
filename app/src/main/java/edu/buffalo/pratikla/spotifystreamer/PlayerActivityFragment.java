@@ -97,6 +97,7 @@ public class PlayerActivityFragment extends Fragment {
                 return;
             }
 
+
             ImageView thumbnail = (ImageView) rootview.findViewById(R.id.album_image);
             Image image = track.album.images.get(0);
             thumbnail.setAdjustViewBounds(true);

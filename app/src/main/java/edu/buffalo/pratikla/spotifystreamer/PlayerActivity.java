@@ -2,11 +2,13 @@ package edu.buffalo.pratikla.spotifystreamer;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 public class PlayerActivity extends AppCompatActivity {
-
+    private final String TAG = "PlayerActivity";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,5 +36,17 @@ public class PlayerActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void previousPressed(View v) {
+        Log.d(TAG, "Previous pressed");
+    }
+
+    public void playPausePressed(View v) {
+        Log.d(TAG, "Play/Pause pressed");
+    }
+
+    public void nextPressed(View v) {
+        Log.d(TAG, "Next pressed");
     }
 }
