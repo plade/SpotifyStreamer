@@ -44,6 +44,13 @@ public class PlayerActivityFragment extends Fragment {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        mediaPlayer.release();
+        mediaPlayer = null;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         rootview = inflater.inflate(R.layout.fragment_player, container, false);
@@ -99,7 +106,7 @@ public class PlayerActivityFragment extends Fragment {
                     int currentPosition = mediaPlayer.getCurrentPosition();
                     seekBar.setProgress(currentPosition);
                 }
-                seekHandler.postDelayed(this, 1000);
+                seekHandler.postDelayed(this, 100);
             }
         });
 
@@ -178,10 +185,10 @@ public class PlayerActivityFragment extends Fragment {
                 Log.d(TAG, url);
                 if (mediaPlayer != null) {
                     mediaPlayer.release();
-                } else {
-                    mediaPlayer = new MediaPlayer();
-                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                    mediaPlayer = null;
                 }
+                mediaPlayer = new MediaPlayer();
+                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 mediaPlayer.setDataSource(url);
                 mediaPlayer.prepareAsync(); // might take long! (for buffering, etc)
                 mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
