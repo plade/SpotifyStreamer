@@ -1,24 +1,28 @@
 package edu.buffalo.pratikla.spotifystreamer;
 
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
+import java.util.ArrayList;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
-import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.Track;
 import retrofit.RetrofitError;
@@ -28,9 +32,14 @@ import retrofit.RetrofitError;
  */
 public class PlayerActivityFragment extends Fragment {
 
-    private String artistId, artistName, trackId, trackName, albumName;
-    View rootview;
     private final String TAG = "PlayerActivityFragment";
+    View rootview;
+    MediaPlayer mediaPlayer;
+    private ArrayList<Track> trackList;
+    private String artistName;
+    private SeekBar seekBar;
+    private int trackPosition;
+    private Handler seekHandler;
     public PlayerActivityFragment() {
     }
 
@@ -40,12 +49,73 @@ public class PlayerActivityFragment extends Fragment {
         rootview = inflater.inflate(R.layout.fragment_player, container, false);
 
         Intent receivedIntent = getActivity().getIntent();
-        artistId = receivedIntent.getStringExtra("artistId");
-        artistName = receivedIntent.getStringExtra("artistName");
-        trackId = receivedIntent.getStringExtra("trackId");
-        trackName = receivedIntent.getStringExtra("trackName");
-        albumName = receivedIntent.getStringExtra("albumName");
         getActivity().setTitle("Spotify Streamer");
+
+
+        seekHandler = new Handler();
+        trackPosition = receivedIntent.getIntExtra("trackPosition", -1);
+        trackList = receivedIntent.getParcelableArrayListExtra("trackList");
+        artistName = receivedIntent.getStringExtra("artistName");
+        if (trackPosition >= 0) {
+            playTrack(trackPosition);
+        }
+
+        ImageButton playButton = (ImageButton) rootview.findViewById(R.id.playPauseButton);
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mediaPlayer.isPlaying())
+                    mediaPlayer.pause();
+
+                else
+                    mediaPlayer.start();
+            }
+        });
+        ImageButton nextButton = (ImageButton) rootview.findViewById(R.id.nextButton);
+        nextButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Next clicked");
+                trackPosition = (trackPosition + 1) % trackList.size();
+                playTrack(trackPosition);
+            }
+        });
+        ImageButton prevButton = (ImageButton) rootview.findViewById(R.id.prevButton);
+        prevButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Previous clicked");
+                trackPosition = (trackPosition + trackList.size() - 1) % trackList.size();
+                playTrack(trackPosition);
+            }
+        });
+
+        seekBar = (SeekBar) rootview.findViewById(R.id.seekbar);
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mediaPlayer != null) {
+                    int currentPosition = mediaPlayer.getCurrentPosition();
+                    seekBar.setProgress(currentPosition);
+                }
+                seekHandler.postDelayed(this, 1000);
+            }
+        });
+
+        return rootview;
+    }
+
+    private void playTrack(int trackPosition) {
+        populateTrackDetails(trackList, artistName, trackPosition);
+        new SpotifyAsyncTask().execute(trackList.get(trackPosition).id);
+    }
+
+    private void populateTrackDetails(ArrayList<Track> trackList, String artistName, int trackPosition) {
+        Track track = trackList.get(trackPosition);
+        String albumName = track.album.name;
+        String trackName = track.name;
+
         final TextView artistNameTv = (TextView) rootview.findViewById(R.id.artist_name);
         final TextView trackNameTv = (TextView) rootview.findViewById(R.id.track_name);
         final TextView albumNameTv = (TextView) rootview.findViewById(R.id.album_name);
@@ -53,12 +123,11 @@ public class PlayerActivityFragment extends Fragment {
         artistNameTv.setText(artistName);
         albumNameTv.setText(albumName);
 
-        playTrack(trackId);
-        return rootview;
     }
 
-    private void playTrack(String trackId) {
-        new SpotifyAsyncTask().execute(trackId);
+    private void makeToast(String key) {
+        Toast toast = Toast.makeText(getActivity(), key, Toast.LENGTH_SHORT);
+        toast.show();
     }
 
     private class SpotifyAsyncTask extends AsyncTask<String, Void, Track> {
@@ -71,8 +140,8 @@ public class PlayerActivityFragment extends Fragment {
 
             if (trackId != null) {
                 SpotifyApi spotifyApi = new SpotifyApi();
-                Map<String, Object> queryMap = new HashMap<>();
-                queryMap.put(SpotifyService.COUNTRY, "US");
+                // Map<String, Object> queryMap = new HashMap<>();
+                // queryMap.put(SpotifyService.COUNTRY, "US");
                 try {
                     Track track = spotifyApi.getService().getTrack(trackId);
                     Log.d(TAG, "Track name is: " + track.name);
@@ -97,7 +166,6 @@ public class PlayerActivityFragment extends Fragment {
                 return;
             }
 
-
             ImageView thumbnail = (ImageView) rootview.findViewById(R.id.album_image);
             Image image = track.album.images.get(0);
             thumbnail.setAdjustViewBounds(true);
@@ -105,12 +173,29 @@ public class PlayerActivityFragment extends Fragment {
                     .load(image.url)
                     .into(thumbnail);
 
-        }
-    }
+            try {
+                String url = track.preview_url;
+                Log.d(TAG, url);
+                if (mediaPlayer != null) {
+                    mediaPlayer.release();
+                } else {
+                    mediaPlayer = new MediaPlayer();
+                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                }
+                mediaPlayer.setDataSource(url);
+                mediaPlayer.prepareAsync(); // might take long! (for buffering, etc)
+                mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(MediaPlayer mp) {
+                        seekBar.setMax(mediaPlayer.getDuration());
+                        mp.start();
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-    private void makeToast(String key) {
-        Toast toast = Toast.makeText(getActivity(), key, Toast.LENGTH_SHORT);
-        toast.show();
+        }
     }
 
 }

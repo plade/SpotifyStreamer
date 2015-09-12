@@ -63,8 +63,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:onClick="previousPressed"
             android:clickable="true"
+            android:onClick="previousPressed"
             android:src="@android:drawable/ic_media_previous" />
 
         <ImageButton
@@ -77,7 +77,7 @@
             android:src="@android:drawable/ic_media_pause" />
 
         <ImageButton
-            android:id="@+id/playButton"
+            android:id="@+id/nextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"

@@ -3,8 +3,8 @@ package edu.buffalo.pratikla.spotifystreamer;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -59,9 +59,10 @@ public class TrackListFragment extends Fragment {
         if (artistName != null) {
 
             ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
-            ab.setTitle("Top 10 Tracks");
-            ab.setSubtitle(artistName);
-
+            if (ab != null) {
+                ab.setTitle("Top 10 Tracks");
+                ab.setSubtitle(artistName);
+            }
 //            getActivity().setTitle("Top 10 Tracks: " + artistName);
             Log.d(TAG, getActivity().getLocalClassName());
 
@@ -81,17 +82,12 @@ public class TrackListFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Track track = mTrackAdapter.mTrackList.get(position);
-                String trackId = track.id;
-                String trackName = track.name;
-                String albumName = track.album.name;
-                makeToast("Playing " + trackName + ".");
+                ArrayList<Track> tracks = (ArrayList<Track>) mTrackAdapter.mTrackList;
+                makeToast("Playing " + tracks.get(position).name + ".");
                 Intent intent = new Intent(getActivity(), PlayerActivity.class);
-                intent.putExtra("artistId", artistId);
+                intent.putExtra("trackPosition", position);
                 intent.putExtra("artistName", artistName);
-                intent.putExtra("trackName", trackName);
-                intent.putExtra("trackId", trackId);
-                intent.putExtra("albumName", albumName);
+                intent.putExtra("trackList", tracks);
                 startActivity(intent);
             }
         });
@@ -125,7 +121,7 @@ public class TrackListFragment extends Fragment {
                 Map<String, Object> queryMap = new HashMap<>();
                 queryMap.put(SpotifyService.COUNTRY, "US");
                 try {
-                    tracks = spotifyApi.getService().getArtistTopTrack(artistId, queryMap);
+                    tracks = spotifyApi.getService().getArtistTopTrack(artistId, "US");
                 } catch (RetrofitError e) {
                     Log.d(TAG, "Exception in HTTP Request: " + e.getMessage());
                     return null;
