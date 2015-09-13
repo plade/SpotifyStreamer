@@ -67,22 +67,23 @@ public class PlayerActivityFragment extends Fragment {
             playTrack(trackPosition);
         }
 
-        ImageButton playButton = (ImageButton) rootview.findViewById(R.id.playPauseButton);
+        final ImageButton playButton = (ImageButton) rootview.findViewById(R.id.playPauseButton);
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mediaPlayer.isPlaying())
+                if (mediaPlayer.isPlaying()) {
                     mediaPlayer.pause();
-
-                else
+                    playButton.setImageResource(android.R.drawable.ic_media_play);
+                } else {
                     mediaPlayer.start();
+                    playButton.setImageResource(android.R.drawable.ic_media_pause);
+                }
             }
         });
         ImageButton nextButton = (ImageButton) rootview.findViewById(R.id.nextButton);
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "Next clicked");
                 trackPosition = (trackPosition + 1) % trackList.size();
                 playTrack(trackPosition);
             }
@@ -91,13 +92,30 @@ public class PlayerActivityFragment extends Fragment {
         prevButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "Previous clicked");
                 trackPosition = (trackPosition + trackList.size() - 1) % trackList.size();
                 playTrack(trackPosition);
             }
         });
 
         seekBar = (SeekBar) rootview.findViewById(R.id.seekbar);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    mediaPlayer.seekTo(progress);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
 
         getActivity().runOnUiThread(new Runnable() {
             @Override
@@ -150,11 +168,9 @@ public class PlayerActivityFragment extends Fragment {
                 // Map<String, Object> queryMap = new HashMap<>();
                 // queryMap.put(SpotifyService.COUNTRY, "US");
                 try {
-                    Track track = spotifyApi.getService().getTrack(trackId);
-                    Log.d(TAG, "Track name is: " + track.name);
-                    return track;
+                    return spotifyApi.getService().getTrack(trackId);
                 } catch (RetrofitError e) {
-                    Log.d(TAG, "Exception in HTTP Request: " + e.getMessage());
+                    Log.e(TAG, "Exception in HTTP Request: " + e.getMessage());
                     return null;
                 } catch (Exception e) {
                     Log.e(TAG, "Unexpected error: ");
@@ -182,7 +198,6 @@ public class PlayerActivityFragment extends Fragment {
 
             try {
                 String url = track.preview_url;
-                Log.d(TAG, url);
                 if (mediaPlayer != null) {
                     mediaPlayer.release();
                     mediaPlayer = null;
