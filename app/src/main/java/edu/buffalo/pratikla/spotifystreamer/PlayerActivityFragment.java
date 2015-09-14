@@ -135,14 +135,16 @@ public class PlayerActivityFragment extends Fragment {
             @Override
             public void run() {
                 if (isPlaying) {
-                    currentPosition += 200;
-
-                    seekBar.setProgress(currentPosition);
-                    setElapsedTime(currentPosition);
+                    if (currentPosition < maxDuration) {
+                        currentPosition += 200;
+                        seekBar.setProgress(currentPosition);
+                        setElapsedTime(currentPosition);
+                    } else {
+                        currentPosition = 0;
+                        isPlaying = false;
+                    }
                 }
-                if (currentPosition < maxDuration) {
-                    seekHandler.postDelayed(this, 200);
-                }
+                seekHandler.postDelayed(this, 200);
             }
         });
 
@@ -252,6 +254,7 @@ public class PlayerActivityFragment extends Fragment {
                 });
 */
                 playButton.setActivated(false);
+                playButton.setImageResource(android.R.drawable.ic_media_pause);
                 currentPosition = 0;
                 isPlaying = true;
                 callService(url, MediaPlayerService.PLAY, 0);
