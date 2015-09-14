@@ -51,11 +51,23 @@ public class TrackListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_track_list, container, false);
+        Log.d(TAG, "Inside TrackListFragment Oncreate");
 
+/*
         Intent receivedIntent = getActivity().getIntent();
+        if (receivedIntent == null) {
+            Log.d(TAG, "returning null");
+            return null;
+        }
         artistId = receivedIntent.getStringExtra("artistId");
         artistName = receivedIntent.getStringExtra("artistName");
+*/
 
+        Bundle args = getArguments();
+        if (args != null) {
+            artistId = args.getString("artistId");
+            artistName = args.getString("artistName");
+        }
         if (artistName != null) {
 
             ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();

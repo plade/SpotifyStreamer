@@ -1,7 +1,6 @@
 package edu.buffalo.pratikla.spotifystreamer;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -37,10 +36,11 @@ import retrofit.RetrofitError;
  * A placeholder fragment containing a simple view.
  */
 public class MainActivityFragment extends Fragment {
-    // private static final String TAG = "MainFragment";
+    private static final String TAG = "MainFragment";
     // private ArrayAdapter mSearchAdapter;
     private ArtistsListAdapter mSearchAdapter;
     private ListView listView;
+    private int mPosition;
     public MainActivityFragment() {
     }
 
@@ -81,11 +81,17 @@ public class MainActivityFragment extends Fragment {
                 String artistId = artist.id;
                 String artistName = artist.name;
                 makeToast("Searching songs for " + artistName + ".");
+/*
                 Intent intent = new Intent(getActivity(), TrackList.class);
                 intent.putExtra("artistId", artistId);
                 intent.putExtra("artistName", artistName);
                 startActivity(intent);
+*/
 
+                ((Callback) getActivity())
+                        .onItemSelected(artistId, artistName);
+                Log.d(TAG, "Send Callback");
+                mPosition = position;
             }
         });
         return rootView;
@@ -99,6 +105,10 @@ public class MainActivityFragment extends Fragment {
     private void makeToast(String key) {
         Toast toast = Toast.makeText(getActivity(), key, Toast.LENGTH_SHORT);
         toast.show();
+    }
+
+    public interface Callback {
+        void onItemSelected(String artistId, String artistName);
     }
 
     private class SpotifyAsyncTask extends AsyncTask<String, Void, ArtistsPager> {

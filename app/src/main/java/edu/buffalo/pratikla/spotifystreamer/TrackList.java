@@ -13,6 +13,19 @@ public class TrackList extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_track_list);
+        if (savedInstanceState == null) {
+
+            Bundle arguments = new Bundle();
+            arguments.putString("artistId", getIntent().getStringExtra("artistId"));
+            arguments.putString("artistName", getIntent().getStringExtra("artistName"));
+
+            TrackListFragment tf = new TrackListFragment();
+            tf.setArguments(arguments);
+
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.track_container, tf)
+                    .commit();
+        }
     }
 
 

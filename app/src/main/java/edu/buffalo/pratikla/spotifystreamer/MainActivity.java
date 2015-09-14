@@ -2,18 +2,34 @@ package edu.buffalo.pratikla.spotifystreamer;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MainActivityFragment.Callback {
 
+    private final String TAG = "MainActivity";
+    private final String TRACKLISTFRAGMENT_TAG = "TLFTAG";
+
+    private boolean mTwoPane;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (findViewById(R.id.track_container) != null) {
+            mTwoPane = true;
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.track_container, new TrackListFragment(), TRACKLISTFRAGMENT_TAG)
+                        .commit();
+            }
+        } else {
+            mTwoPane = false;
+        }
     }
 
 
@@ -46,5 +62,26 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onItemSelected(String artistId, String artistName) {
+        Log.d(TAG, "Received callback");
+        if (mTwoPane) {
+            Bundle args = new Bundle();
+            args.putString("artistId", artistId);
+            args.putString("artistName", artistName);
+            TrackListFragment tf = new TrackListFragment();
+            tf.setArguments(args);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.track_container, tf, TRACKLISTFRAGMENT_TAG)
+                    .commit();
+        } else {
+            Intent intent = new Intent(this, TrackList.class);
+            intent.putExtra("artistId", artistId);
+            intent.putExtra("artistName", artistName);
+            startActivity(intent);
+        }
     }
 }
