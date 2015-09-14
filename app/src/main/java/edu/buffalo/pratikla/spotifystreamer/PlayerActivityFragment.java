@@ -1,8 +1,6 @@
 package edu.buffalo.pratikla.spotifystreamer;
 
 import android.content.Intent;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,7 +17,6 @@ import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
@@ -33,12 +30,17 @@ import retrofit.RetrofitError;
 public class PlayerActivityFragment extends Fragment {
 
     private final String TAG = "PlayerActivityFragment";
-    View rootview;
-    MediaPlayer mediaPlayer;
+    View rootView;
+    //    MediaPlayer mediaPlayer;
+    private int currentPosition;
+    private int maxDuration = 30000;
+    private boolean isPlaying = false;
     private ArrayList<Track> trackList;
     private String artistName;
+    private TextView elapsedTime, totalTime;
     private SeekBar seekBar;
     private int trackPosition;
+    private ImageButton playButton;
     private Handler seekHandler;
     public PlayerActivityFragment() {
     }
@@ -46,14 +48,16 @@ public class PlayerActivityFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+/*
         mediaPlayer.release();
         mediaPlayer = null;
+*/
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        rootview = inflater.inflate(R.layout.fragment_player, container, false);
+        rootView = inflater.inflate(R.layout.fragment_player, container, false);
 
         Intent receivedIntent = getActivity().getIntent();
         getActivity().setTitle("Spotify Streamer");
@@ -67,20 +71,26 @@ public class PlayerActivityFragment extends Fragment {
             playTrack(trackPosition);
         }
 
-        final ImageButton playButton = (ImageButton) rootview.findViewById(R.id.playPauseButton);
+        elapsedTime = (TextView) rootView.findViewById(R.id.elapsed_time);
+        totalTime = (TextView) rootView.findViewById(R.id.total_time);
+        playButton = (ImageButton) rootView.findViewById(R.id.playPauseButton);
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mediaPlayer.isPlaying()) {
-                    mediaPlayer.pause();
+                if (!playButton.isActivated()) {
                     playButton.setImageResource(android.R.drawable.ic_media_play);
+                    playButton.setActivated(true);
+                    isPlaying = false;
+                    callService(null, MediaPlayerService.PAUSE, 0);
                 } else {
-                    mediaPlayer.start();
                     playButton.setImageResource(android.R.drawable.ic_media_pause);
+                    playButton.setActivated(false);
+                    isPlaying = true;
+                    callService(null, MediaPlayerService.UNPAUSE, 0);
                 }
             }
         });
-        ImageButton nextButton = (ImageButton) rootview.findViewById(R.id.nextButton);
+        ImageButton nextButton = (ImageButton) rootView.findViewById(R.id.nextButton);
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -88,7 +98,7 @@ public class PlayerActivityFragment extends Fragment {
                 playTrack(trackPosition);
             }
         });
-        ImageButton prevButton = (ImageButton) rootview.findViewById(R.id.prevButton);
+        ImageButton prevButton = (ImageButton) rootView.findViewById(R.id.prevButton);
         prevButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -97,12 +107,16 @@ public class PlayerActivityFragment extends Fragment {
             }
         });
 
-        seekBar = (SeekBar) rootview.findViewById(R.id.seekbar);
+        seekBar = (SeekBar) rootView.findViewById(R.id.seekbar);
+        seekBar.setMax(maxDuration);
+        totalTime.setText("0:" + (maxDuration / 1000));
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
-                    mediaPlayer.seekTo(progress);
+                    callService(null, MediaPlayerService.SEEK, progress);
+                    currentPosition = progress;
+                    setElapsedTime(progress);
                 }
             }
 
@@ -120,15 +134,29 @@ public class PlayerActivityFragment extends Fragment {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (mediaPlayer != null) {
-                    int currentPosition = mediaPlayer.getCurrentPosition();
+                if (isPlaying) {
+                    currentPosition += 200;
+
                     seekBar.setProgress(currentPosition);
+                    setElapsedTime(currentPosition);
                 }
-                seekHandler.postDelayed(this, 100);
+                if (currentPosition < maxDuration) {
+                    seekHandler.postDelayed(this, 200);
+                }
             }
         });
 
-        return rootview;
+        return rootView;
+    }
+
+    private void setElapsedTime(int elapsed) {
+        int sec = (elapsed / 1000) % 60;
+        int min = elapsed / 60000;
+        if (sec < 10) {
+            elapsedTime.setText("" + min + ":0" + sec);
+        } else {
+            elapsedTime.setText("" + min + ":" + sec);
+        }
     }
 
     private void playTrack(int trackPosition) {
@@ -141,9 +169,9 @@ public class PlayerActivityFragment extends Fragment {
         String albumName = track.album.name;
         String trackName = track.name;
 
-        final TextView artistNameTv = (TextView) rootview.findViewById(R.id.artist_name);
-        final TextView trackNameTv = (TextView) rootview.findViewById(R.id.track_name);
-        final TextView albumNameTv = (TextView) rootview.findViewById(R.id.album_name);
+        final TextView artistNameTv = (TextView) rootView.findViewById(R.id.artist_name);
+        final TextView trackNameTv = (TextView) rootView.findViewById(R.id.track_name);
+        final TextView albumNameTv = (TextView) rootView.findViewById(R.id.album_name);
         trackNameTv.setText(trackName);
         artistNameTv.setText(artistName);
         albumNameTv.setText(albumName);
@@ -153,6 +181,14 @@ public class PlayerActivityFragment extends Fragment {
     private void makeToast(String key) {
         Toast toast = Toast.makeText(getActivity(), key, Toast.LENGTH_SHORT);
         toast.show();
+    }
+
+    private void callService(String url, String action, int seek) {
+        Intent intent = new Intent(getActivity(), MediaPlayerService.class);
+        intent.putExtra("previewUrl", url);
+        intent.putExtra("seek", seek);
+        intent.setAction(action);
+        getActivity().startService(intent);
     }
 
     private class SpotifyAsyncTask extends AsyncTask<String, Void, Track> {
@@ -189,7 +225,7 @@ public class PlayerActivityFragment extends Fragment {
                 return;
             }
 
-            ImageView thumbnail = (ImageView) rootview.findViewById(R.id.album_image);
+            ImageView thumbnail = (ImageView) rootView.findViewById(R.id.album_image);
             Image image = track.album.images.get(0);
             thumbnail.setAdjustViewBounds(true);
             Picasso.with(getActivity())
@@ -198,6 +234,7 @@ public class PlayerActivityFragment extends Fragment {
 
             try {
                 String url = track.preview_url;
+/*
                 if (mediaPlayer != null) {
                     mediaPlayer.release();
                     mediaPlayer = null;
@@ -213,11 +250,15 @@ public class PlayerActivityFragment extends Fragment {
                         mp.start();
                     }
                 });
-            } catch (IOException e) {
+*/
+                playButton.setActivated(false);
+                currentPosition = 0;
+                isPlaying = true;
+                callService(url, MediaPlayerService.PLAY, 0);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
         }
     }
-
 }

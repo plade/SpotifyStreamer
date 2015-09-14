@@ -21,7 +21,7 @@
         android:id="@+id/album_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/artist_name"
+        android:layout_below="@id/artist_name"
         android:layout_centerHorizontal="true"
         android:gravity="center_horizontal"
         android:textSize="20sp" />
@@ -30,7 +30,8 @@
         android:id="@+id/album_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/album_name"
+        android:layout_above="@+id/track_name"
+        android:layout_below="@id/album_name"
         android:layout_centerHorizontal="true"
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="20dp"
@@ -38,24 +39,44 @@
         android:scaleType="fitXY" />
 
     <TextView
-        android:id="@+id/track_name"
+        android:id="@id/track_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/album_image"
+        android:layout_above="@+id/seekbar"
         android:layout_centerHorizontal="true"
         android:gravity="center_horizontal"
         android:textSize="20sp" />
-
     <SeekBar
-        android:id="@+id/seekbar"
-        android:layout_width="fill_parent"
-        android:layout_height="30dp"
-        android:layout_below="@+id/track_name" />
-
-    <LinearLayout
+        android:id="@id/seekbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/seekbar"
+        android:layout_above="@+id/timeLayout" />
+
+    <RelativeLayout
+        android:id="@id/timeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/buttonLayout">
+
+        <TextView
+            android:id="@+id/elapsed_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/total_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:textSize="14sp" />
+    </RelativeLayout>
+    <LinearLayout
+        android:id="@id/buttonLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:orientation="horizontal">
 
         <ImageButton
