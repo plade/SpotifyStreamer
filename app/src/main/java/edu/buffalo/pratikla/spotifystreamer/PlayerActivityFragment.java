@@ -1,10 +1,10 @@
 package edu.buffalo.pratikla.spotifystreamer;
 
+import android.app.DialogFragment;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,7 +27,7 @@ import retrofit.RetrofitError;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class PlayerActivityFragment extends Fragment {
+public class PlayerActivityFragment extends DialogFragment {
 
     private final String TAG = "PlayerActivityFragment";
     View rootView;
@@ -64,9 +64,16 @@ public class PlayerActivityFragment extends Fragment {
 
 
         seekHandler = new Handler();
-        trackPosition = receivedIntent.getIntExtra("trackPosition", -1);
-        trackList = receivedIntent.getParcelableArrayListExtra("trackList");
-        artistName = receivedIntent.getStringExtra("artistName");
+        if (getArguments() != null) {
+            Bundle bundle = getArguments();
+            trackPosition = bundle.getInt("trackPosition", -1);
+            trackList = bundle.getParcelableArrayList("trackList");
+            artistName = bundle.getString("artistName");
+        } else {
+            trackPosition = receivedIntent.getIntExtra("trackPosition", -1);
+            trackList = receivedIntent.getParcelableArrayListExtra("trackList");
+            artistName = receivedIntent.getStringExtra("artistName");
+        }
         if (trackPosition >= 0) {
             playTrack(trackPosition);
         }

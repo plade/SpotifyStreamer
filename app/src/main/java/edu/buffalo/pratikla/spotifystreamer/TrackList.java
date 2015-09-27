@@ -18,6 +18,7 @@ public class TrackList extends AppCompatActivity {
             Bundle arguments = new Bundle();
             arguments.putString("artistId", getIntent().getStringExtra("artistId"));
             arguments.putString("artistName", getIntent().getStringExtra("artistName"));
+            arguments.putBoolean("twoPane", false);
 
             TrackListFragment tf = new TrackListFragment();
             tf.setArguments(arguments);

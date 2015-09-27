@@ -1,5 +1,6 @@
 package edu.buffalo.pratikla.spotifystreamer;
 
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -40,6 +41,7 @@ public class TrackListFragment extends Fragment {
     private final String TAG = "TrackListFragment";
     private String artistName;
     private String artistId;
+    private boolean twoPane;
     private List<Track> mTrackList;
 
     private ListView listView;
@@ -53,20 +55,11 @@ public class TrackListFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_track_list, container, false);
         Log.d(TAG, "Inside TrackListFragment Oncreate");
 
-/*
-        Intent receivedIntent = getActivity().getIntent();
-        if (receivedIntent == null) {
-            Log.d(TAG, "returning null");
-            return null;
-        }
-        artistId = receivedIntent.getStringExtra("artistId");
-        artistName = receivedIntent.getStringExtra("artistName");
-*/
-
         Bundle args = getArguments();
         if (args != null) {
             artistId = args.getString("artistId");
             artistName = args.getString("artistName");
+            twoPane = args.getBoolean("twoPane");
         }
         if (artistName != null) {
 
@@ -75,7 +68,6 @@ public class TrackListFragment extends Fragment {
                 ab.setTitle("Top 10 Tracks");
                 ab.setSubtitle(artistName);
             }
-//            getActivity().setTitle("Top 10 Tracks: " + artistName);
             Log.d(TAG, getActivity().getLocalClassName());
 
 
@@ -96,16 +88,33 @@ public class TrackListFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ArrayList<Track> tracks = (ArrayList<Track>) mTrackAdapter.mTrackList;
                 makeToast("Playing " + tracks.get(position).name + ".");
-                Intent intent = new Intent(getActivity(), PlayerActivity.class);
-                intent.putExtra("trackPosition", position);
-                intent.putExtra("artistName", artistName);
-                intent.putExtra("trackList", tracks);
-                startActivity(intent);
+                startPlayer(position, artistName, tracks);
             }
         });
 
 
         return rootView;
+    }
+
+    void startPlayer(int position, String artistName, ArrayList<Track> tracks) {
+        FragmentManager fragmentManager = getActivity().getFragmentManager();
+        PlayerActivityFragment newFragment = new PlayerActivityFragment();
+
+        if (!twoPane) {
+            Intent intent = new Intent(getActivity(), PlayerActivity.class);
+            intent.putExtra("trackPosition", position);
+            intent.putExtra("artistName", artistName);
+            intent.putExtra("trackList", tracks);
+            startActivity(intent);
+        } else {
+            Bundle bundle = new Bundle();
+            bundle.putInt("trackPosition", position);
+            bundle.putString("artistName", artistName);
+            bundle.putParcelableArrayList("trackList", tracks);
+            newFragment.setArguments(bundle);
+            newFragment.show(fragmentManager, "dialog");
+
+        }
     }
 
     void populateTrackList(String artistId) {

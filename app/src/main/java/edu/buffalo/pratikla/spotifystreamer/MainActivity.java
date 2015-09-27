@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
             Bundle args = new Bundle();
             args.putString("artistId", artistId);
             args.putString("artistName", artistName);
+            args.putBoolean("twoPane", true);
             TrackListFragment tf = new TrackListFragment();
             tf.setArguments(args);
 
