@@ -23,6 +23,8 @@ public class MediaPlayerService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         int retVal = super.onStartCommand(intent, flags, startId);
+        if (intent == null)
+            return 0;
         String action = intent.getAction();
         String url = intent.getStringExtra("previewUrl");
         int seek = intent.getIntExtra("seek", 0);
